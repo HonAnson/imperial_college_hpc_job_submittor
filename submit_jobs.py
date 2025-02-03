@@ -83,7 +83,7 @@ for config_path in config_paths:
 
     # Write the PBS script
     with open(pbs_filename, 'w') as pbs_file:
-        pbs_file.write(pbs_template_cx3_cpu.format(
+        pbs_file.write(pbs_template_cx3_gpu.format(
             config_path=str(new_config_path),  # Convert to string for safe formatting
             log=log_filename,
             pbs_directory=str(pbs_directory)  # Convert to string for safe formatting

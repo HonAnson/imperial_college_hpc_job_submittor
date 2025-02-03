@@ -4,9 +4,13 @@ import toml
 import itertools
 import numpy as np
 from dataclasses import dataclass
+from pathlib import Path
 
 @dataclass
 class JobArguments:
+    scaling_factor: float 
+    max_scalar: float 
+
     # Data io
     input_dir_raw: str
     input_dir_pseudo: str
@@ -64,6 +68,8 @@ class JobArguments:
 def generate_toml_config(file_name, file_path, args):
     # Define the configuration data
     config_data = {
+        "scaling_factor": args.scaling_factor,
+        "max_scalar": args.max_scalar,
         "data_io": {
             "input_dir_raw": args.input_dir_raw,
             "input_dir_pseudo": args.input_dir_pseudo,
@@ -114,7 +120,16 @@ def generate_toml_config(file_name, file_path, args):
         toml.dump(config_data, toml_file)
         toml_file.write("\n# End of configuration\n")
 
-def generate_multiple_config(file_io, hyperparameters, loss_weights):
+def generate_multiple_config(file_io, hyperparameters, loss_weights):    
+    # load model scale and scalar scale for writing into config file
+    input_dir_raw = Path(file_io["input_dir_raw"])
+    npz_file = sorted(input_dir_raw.glob("*.npz"))[0]
+    data = np.load(npz_file)
+    meta_data = {
+        "scaling_factor": data['scaling_factor'].item(),
+        "max_scalar": data['max_scalar'].item()
+    }
+
     # Generate all combinations of hyperparameters
     hyperparameter_combinations = list(itertools.product(*hyperparameters.values()))    # * is unpacking operator
     loss_weights_combinations = list(itertools.product(*loss_weights.values()))
@@ -146,7 +161,7 @@ def generate_multiple_config(file_io, hyperparameters, loss_weights):
 
     # put hyperparameter names and values into a dict
     parameter_names = [key for key in hyperparameters.keys()] + [key for key in loss_weights.keys()]
-    named_combinations = [dict(zip(parameter_names, combo)) | file_io for combo in all_combinations]
+    named_combinations = [dict(zip(parameter_names, combo)) | file_io | meta_data for combo in all_combinations]
 
     # use replace values in JobArguments dataclass, while unspecified hyperparameter is kept default
     combination_dataclass_list = [JobArguments(**parameters) for parameters in named_combinations]
@@ -167,16 +182,15 @@ if __name__ == "__main__":
     ### Choose data here ###
     dataset = "newer_college"
     sequence_name = "11-35-14_quad-hard"
-    batch_name = "quad_hard_barf_search_cpu_small"
+    batch_name = "quat_hard_no_T"
 
     ### Choose parameters here ###
     hyperparameters = {
-        "start_barf_iter" : [0],     # doesn't seem to have much influene
-        "end_barf_iter": [5000,10000,20000],
-        "start_learn_pose_L" : [6,8,9,10],
+        "end_barf_iter": [10000, 20000, 40000],
+        "start_learn_pose_L" : [2,4,6,8,10],
     }
     loss_weights = {
-        "lambda_T" : [1],
+        "lambda_T" : [0],
         "lambda_h" : [1],
         "lambda_d" : [1],
         "lambda_r" : [1],
@@ -192,6 +206,11 @@ if __name__ == "__main__":
         "output_dir": f"./output/{date}",
         "batch_name": batch_name,
     }
+
+
+
+
+
     generate_multiple_config(file_io, hyperparameters, loss_weights)
     ####### END DO NOT EDIT #########
 
