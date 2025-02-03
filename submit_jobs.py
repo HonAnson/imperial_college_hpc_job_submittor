@@ -13,19 +13,15 @@ def dict_to_namespace(d):
     else:
         return d
 
-
-
 date = datetime.today().strftime("%Y%m%d")
 
 # List of configurations file to be used
 config_directory = Path("./configs/staging")
 config_paths = [file.resolve() for file in config_directory.glob("*.toml")]
-# submitted_config_directory = Path(f"./configs/submitted/{date}")
-# submitted_config_directory.mkdir(exist_ok=True)
 
 # Template for the PBS script
-pbs_template_cx3_gpu = """#PBS -l walltime=24:00:00
-#PBS -l select=1:ncpus=4:mem=24gb:ngpus=1
+pbs_template_cx3_gpu = """#PBS -l select=1:ncpus=4:mem=64gb:ngpus=1
+#PBS -l walltime=12:00:00
 
 # Navigate to the project directory
 cd $HOME/neural_lidar

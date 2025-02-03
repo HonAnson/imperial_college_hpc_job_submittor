@@ -2,9 +2,9 @@ import os
 import time
 from datetime import datetime
 
-for i in range(12):
+for i in range(4):
     # Submit the PBS script
-    os.system(f"qdel {i+161822}")
+    os.system(f"qdel {i+156443}")
     time.sleep(1)
 
 

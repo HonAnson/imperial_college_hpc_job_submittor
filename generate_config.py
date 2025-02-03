@@ -11,13 +11,13 @@ class JobArguments:
     scaling_factor: float 
     max_scalar: float 
 
-    # Data io
+    ### Data io ###
     input_dir_raw: str
     input_dir_pseudo: str
     output_dir: str
     batch_name: str
 
-    # Preparation parameters
+    ### Preparation parameters ###
     nerf_model_type: str = "density"
     ray_sampling_strategy: str = "ray_shuffle"  # Ray sampling strategy
     num_ray_sample_per_frame: int = 16  # Number of rays sampled per frame
@@ -44,8 +44,8 @@ class JobArguments:
     end_barf_iter: int = 2000000  # Epoch to fully use all positional encoding frequencies
     start_learn_pose_L: int = 4  # Starting positional encoding dimension for pose learning
 
-    # Training settings
-    num_epoch: int = 16  # Number of epochs for training
+    ### Training settings ###
+    num_epoch: int = 8  # Number of epochs for training
 
     # Pose learning
     learn_rot: bool = True  # Whether to learn rotation
@@ -181,16 +181,16 @@ if __name__ == "__main__":
 
     ### Choose data here ###
     dataset = "newer_college"
-    sequence_name = "11-35-14_quad-hard"
-    batch_name = "quat_hard_no_T"
+    sequence_name = "10-37-38_quad-easy"
+    batch_name = "quad_easy_barf_search_new"
 
     ### Choose parameters here ###
     hyperparameters = {
-        "end_barf_iter": [10000, 20000, 40000],
+        "end_barf_iter": [20000,80000],
         "start_learn_pose_L" : [2,4,6,8,10],
     }
     loss_weights = {
-        "lambda_T" : [0],
+        "lambda_T" : [1],
         "lambda_h" : [1],
         "lambda_d" : [1],
         "lambda_r" : [1],
@@ -206,11 +206,6 @@ if __name__ == "__main__":
         "output_dir": f"./output/{date}",
         "batch_name": batch_name,
     }
-
-
-
-
-
     generate_multiple_config(file_io, hyperparameters, loss_weights)
     ####### END DO NOT EDIT #########
 
