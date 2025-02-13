@@ -41,11 +41,11 @@ class JobArguments:
 
     # BARF parameters
     start_barf_iter: int = 0  # Epoch to start using higher frequency positional encoding
-    end_barf_iter: int = 2000000  # Epoch to fully use all positional encoding frequencies
-    start_learn_pose_L: int = 4  # Starting positional encoding dimension for pose learning
+    end_barf_iter: int = 40000  # Epoch to fully use all positional encoding frequencies
+    start_learn_pose_L: int = 8  # Starting positional encoding dimension for pose learning
 
     ### Training settings ###
-    num_epoch: int = 8  # Number of epochs for training
+    num_epoch: int = 4  # Number of epochs for training
 
     # Pose learning
     learn_rot: bool = True  # Whether to learn rotation
@@ -60,7 +60,7 @@ class JobArguments:
     # Volume sampling
     num_bins: int = 100  # Number of bins along a ray
     near_plane: float = 0.0  # Near plane distance
-    far_plane: float = 2.0  # Far plane distance
+    far_plane: float = 3.73  # Far plane distance
 
     # Targets
     prediction_variance: float = 0.001  # Variance of target ray termination distribution
@@ -180,15 +180,21 @@ if __name__ == "__main__":
     # "11-31-35_quad-medium"
 
     ### Choose data here ###
-    dataset = "newer_college"
-    sequence_name = "10-37-38_quad-easy"
-    batch_name = "quad_easy_barf_search_new"
+    dataset = "nuscenes"
+    sequence_name = "mini_sample"
+    batch_name = "nuscene_initial"
 
     ### Choose parameters here ###
     hyperparameters = {
-        "end_barf_iter": [20000,80000],
-        "start_learn_pose_L" : [2,4,6,8,10],
+        "end_barf_iter": [40000],
+        "start_learn_pose_L" : [8],
+        "pos_emb_dim": [10],
+        "rotation_perturbation_variance": [0.02],
+        "translation_perturbation_variance": [0.02],
+        "pose_learning_rate": [0.00025]
+        
     }
+
     loss_weights = {
         "lambda_T" : [1],
         "lambda_h" : [1],
@@ -202,11 +208,9 @@ if __name__ == "__main__":
     date = datetime.today().strftime("%Y%m%d")
     file_io = {
         "input_dir_raw": f"./data/training/{dataset}/{sequence_name}/raw",
-        "input_dir_pseudo": f"./data/training/{dataset}/{sequence_name}/pseudo64",
+        "input_dir_pseudo": f"./data/training/{dataset}/{sequence_name}/pseudo128",
         "output_dir": f"./output/{date}",
         "batch_name": batch_name,
     }
     generate_multiple_config(file_io, hyperparameters, loss_weights)
     ####### END DO NOT EDIT #########
-
-
